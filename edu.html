@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Demo: Edu Guide | Bhoomi Kumari Singh</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-primary: #050814;
+      --card-bg: rgba(22, 30, 49, 0.45);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #10b981; /* Emerald theme for Edu Guide */
+      --accent-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .glow-orb {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      filter: blur(180px);
+      opacity: 0.12;
+      z-index: -1;
+      bottom: 15%;
+      left: 10%;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      margin-bottom: 30px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .back-btn:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(-3px);
+    }
+
+    .edu-container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 45px -15px rgba(0,0,0,0.6);
+    }
+
+    .edu-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .edu-header h1 {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      margin-bottom: 8px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .edu-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .roadmap-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .selector-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.3s ease;
+    }
+
+    .selector-btn:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .selector-btn.active {
+      background: var(--accent-gradient);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Roadmap Visualizer Timeline */
+    .roadmap-timeline {
+      position: relative;
+      padding-left: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .roadmap-node {
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .node-bullet {
+      position: absolute;
+      left: -30px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #090e1a;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+
+    .roadmap-node:hover .node-bullet, .roadmap-node.active .node-bullet {
+      background: var(--accent-color);
+      border-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 10px var(--accent-color);
+      transform: scale(1.25);
+    }
+
+    .node-content {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .roadmap-node:hover .node-content {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .roadmap-node.active .node-content {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: var(--accent-color);
+    }
+
+    .node-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .node-step {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .node-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .node-summary {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    .node-details {
+      display: none;
+      border-top: 1px solid var(--border-color);
+      padding-top: 15px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .roadmap-node.active .node-details {
+      display: block;
+    }
+
+    .details-list {
+      margin-left: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .resource-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .resource-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb"></div>
+
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Portfolio</a>
+
+  <div class="edu-container">
+    <div class="edu-header">
+      <h1>Learning Roadmap Guide</h1>
+      <p>Interactive step-by-step career guidelines & reference resources</p>
+    </div>
+
+    <div class="roadmap-selector">
+      <button class="selector-btn active" data-roadmap="aiml">AI / Machine Learning</button>
+      <button class="selector-btn" data-roadmap="webdev">Full Stack Web Developer</button>
+      <button class="selector-btn" data-roadmap="dsa">Data Structures & Algorithms</button>
+    </div>
+
+    <div class="roadmap-timeline" id="roadmap-timeline">
+      <!-- Dynamic timeline items -->
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const timeline = document.getElementById('roadmap-timeline');
+      const selectorBtns = document.querySelectorAll('.selector-btn');
+
+      // Roadmap Datasets
+      const roadmaps = {
+        aiml: [
+          {
+            step: "Step 1",
+            title: "Foundational Programming & Mathematics",
+            summary: "Master core programming syntax and mathematical foundations required for neural operations.",
+            topics: [
+              "Python syntax, functions, OOP concepts",
+              "Linear Algebra: Matrices, Eigenvalues, Vectors",
+              "Calculus: Derivatives, Gradients, Optimization",
+              "Probability & Statistics: Distributions, Bayes Theorem"
+            ],
+            resource: "https://www.khanacademy.org/math/linear-algebra"
+          },
+          {
+            step: "Step 2",
+            title: "Data Manipulation & Analytics",
+            summary: "Learn how to preprocess data, clean datasets, and engineer statistical features.",
+            topics: [
+              "Pandas: DataFrames, aggregation, merging",
+              "NumPy: Multidimensional matrix operations",
+              "Matplotlib & Seaborn: Statistical visualization",
+              "Feature Scaling: Normalization, Standardization"
+            ],
+            resource: "https://pandas.pydata.org/docs/"
+          },
+          {
+            step: "Step 3",
+            title: "Classical Machine Learning",
+            summary: "Implement mathematical algorithms to make predictions on structured datasets.",
+            topics: [
+              "Supervised: Linear/Logistic Regression, Decision Trees, SVMs",
+              "Unsupervised: K-Means Clustering, PCA reduction",
+              "Model Evaluation: Bias/Variance trade-off, Cross Validation",
+              "Libraries: Scikit-Learn"
+            ],
+            resource: "https://scikit-learn.org/"
+          },
+          {
+            step: "Step 4",
+            title: "Deep Learning & Specialized AI",
+            summary: "Build multi-layer artificial neural networks for computer vision or language modeling.",
+            topics: [
+              "Perceptrons & Backpropagation mechanics",
+              "Computer Vision: Convolutional Neural Networks (CNNs)",
+              "NLP & Generative AI: Transformers, LLM architectures",
+              "Frameworks: TensorFlow or PyTorch"
+            ],
+            resource: "https://www.deeplearning.ai/"
+          }
+        ],
+        webdev: [
+          {
+            step: "Step 1",
+            title: "Frontend Basics (UI Structure)",
+            summary: "Build responsive, structured templates and master interactive layouts.",
+            topics: [
+              "Semantic HTML5 tags and document structures",
+              "CSS Grid & Flexbox alignment systems",
+              "Modern responsive styling (media queries)",
+              "Vanilla JavaScript: DOM events, loops, variables"
+            ],
+            resource: "https://developer.mozilla.org/en-US/"
+          },
+          {
+            step: "Step 2",
+            title: "Interactive Web APIs & Advanced Logic",
+            summary: "Fetch asynchronous data and link applications to external web services.",
+            topics: [
+              "AJAX & Fetch API: Promises, Async/Await syntax",
+              "Browser Web Storage: localStorage, sessionStorage",
+              "JSON data serialization",
+              "Git & Version Control fundamentals"
+            ],
+            resource: "https://javascript.info/"
+          },
+          {
+            step: "Step 3",
+            title: "Frontend Frameworks",
+            summary: "Organize modern single-page applications using component-based development.",
+            topics: [
+              "React.js state management and lifecycle hooks",
+              "Router setups & components routing",
+              "CSS framework packages: TailwindCSS",
+              "Node Package Manager (npm/yarn) dependency structures"
+            ],
+            resource: "https://react.dev/"
+          },
+          {
+            step: "Step 4",
+            title: "Backend Services & Databases",
+            summary: "Create server APIs and store records in database systems.",
+            topics: [
+              "Node.js server setups & Express.js frameworks",
+              "Restful API routing and headers",
+              "Relational databases: SQL queries",
+              "NoSQL systems: MongoDB schemas"
+            ],
+            resource: "https://nodejs.org/"
+          }
+        ],
+        dsa: [
+          {
+            step: "Step 1",
+            title: "Complexity & Linear Data Structures",
+            summary: "Analyze algorithm speed bounds and handle sequences of items.",
+            topics: [
+              "Big-O notation, Time & Space complexities",
+              "Arrays, Multi-dimensional matrices",
+              "Linked Lists: Singly, Doubly, circular operations",
+              "Stacks & Queues: FIFO/LIFO rules"
+            ],
+            resource: "https://www.geeksforgeeks.org/data-structures/"
+          },
+          {
+            step: "Step 2",
+            title: "Searching, Sorting & Trees",
+            summary: "Organize database records and traverse hierarchical data tree representations.",
+            topics: [
+              "Binary Search: logarithmic hunting",
+              "Sorting: QuickSort, MergeSort, HeapSort efficiency",
+              "Binary Trees & BST traversal: Inorder, Preorder, Postorder",
+              "Balanced Trees basics: AVL trees"
+            ],
+            resource: "https://www.khanacademy.org/computing/computer-science/algorithms"
+          },
+          {
+            step: "Step 3",
+            title: "Non-Linear Structures & Graphs",
+            summary: "Model complex network linkages and traverse nodes.",
+            topics: [
+              "Heaps & Hash Tables operations (collision handling)",
+              "Graph representations: Adjacency list/matrix",
+              "Traversals: Breadth-First Search (BFS), Depth-First Search (DFS)",
+              "Shortest Path algorithms: Dijkstra's"
+            ],
+            resource: "https://visualgo.net/en"
+          }
+        ]
+      };
+
+      function renderRoadmap(roadmapKey) {
+        timeline.innerHTML = '';
+        const nodes = roadmaps[roadmapKey];
+
+        nodes.forEach((node, index) => {
+          const div = document.createElement('div');
+          // Make first node active by default
+          div.className = `roadmap-node ${index === 0 ? 'active' : ''}`;
+          
+          let topicsHtml = '';
+          node.topics.forEach(t => {
+            topicsHtml += `<li>${t}</li>`;
+          });
+
+          div.innerHTML = `
+            <div class="node-bullet"></div>
+            <div class="node-content">
+              <div class="node-header-row">
+                <span class="node-step">${node.step}</span>
+              </div>
+              <h3 class="node-title">${node.title}</h3>
+              <p class="node-summary">${node.summary}</p>
+              
+              <div class="node-details">
+                <h4 style="margin-bottom:8px; color:var(--text-primary);">Key Learning Topics:</h4>
+                <ul class="details-list">
+                  ${topicsHtml}
+                </ul>
+                <a href="${node.resource}" target="_blank" class="resource-link">
+                  <i class="fa-solid fa-graduation-cap"></i> Recommended Study Resource
+                </a>
+              </div>
+            </div>
+          `;
+
+          div.addEventListener('click', (e) => {
+            // Check if user clicked a link
+            if (e.target.closest('a')) return;
+            
+            // Toggle active state on node
+            const isActive = div.classList.contains('active');
+            
+            // Close all
+            document.querySelectorAll('.roadmap-node').forEach(n => n.classList.remove('active'));
+            
+            // Open this one if it wasn't active
+            if (!isActive) {
+              div.classList.add('active');
+            }
+          });
+
+          timeline.appendChild(div);
+        });
+      }
+
+      // Selector Button Clicks
+      selectorBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          selectorBtns.forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          const roadmapKey = e.target.getAttribute('data-roadmap');
+          renderRoadmap(roadmapKey);
+        });
+      });
+
+      // Initial load
+      renderRoadmap('aiml');
+    });
+  </script>
+</body>
+</html>

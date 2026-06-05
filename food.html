@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Demo: Food Ingredient App | Bhoomi Kumari Singh</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-primary: #050814;
+      --card-bg: rgba(22, 30, 49, 0.45);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #f97316; /* Orange theme for Food */
+      --accent-gradient: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .glow-orb {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      filter: blur(180px);
+      opacity: 0.12;
+      z-index: -1;
+      top: 10%;
+      right: 10%;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      margin-bottom: 30px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .back-btn:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(-3px);
+    }
+
+    .food-container {
+      width: 100%;
+      max-width: 750px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 45px -15px rgba(0,0,0,0.6);
+    }
+
+    .food-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .food-header h1 {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      margin-bottom: 8px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .food-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .search-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+
+    .ingredients-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 14px 20px;
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .ingredients-input:focus {
+      border-color: var(--accent-color);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+    }
+
+    .find-btn {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+    }
+
+    .find-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+    }
+
+    .suggestions {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .suggestions span {
+      color: var(--text-primary);
+      cursor: pointer;
+      text-decoration: underline;
+      margin-right: 8px;
+    }
+
+    .suggestions span:hover {
+      color: var(--accent-color);
+    }
+
+    /* Recipes Grid */
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .recipe-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(249, 115, 22, 0.3);
+      box-shadow: 0 10px 25px -10px rgba(0,0,0,0.5);
+    }
+
+    .recipe-details-summary {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .recipe-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .match-tag {
+      font-size: 0.75rem;
+      color: #10b981;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .recipe-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: auto;
+    }
+
+    .recipe-meta span i {
+      color: var(--accent-color);
+      margin-right: 4px;
+    }
+
+    /* Modal Overlay */
+    .recipe-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 8, 20, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #090e1a;
+      border: 1px solid var(--border-color);
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      border-radius: 20px;
+      padding: 35px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .close-modal:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-title {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .modal-meta span i {
+      color: var(--accent-color);
+      margin-right: 6px;
+    }
+
+    .modal-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .modal-ingredients {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .modal-ingredients li {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-ingredients li::before {
+      content: '\f058';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      color: var(--accent-color);
+      font-size: 14px;
+    }
+
+    .modal-instructions {
+      list-style: decimal;
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .modal-instructions li {
+      line-height: 1.5;
+    }
+
+    @media (max-width: 580px) {
+      .recipes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb"></div>
+
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Portfolio</a>
+
+  <div class="food-container">
+    <div class="food-header">
+      <h1>Culinary Ingredient Matcher</h1>
+      <p>Enter the ingredients in your fridge to discover matching recipes</p>
+    </div>
+
+    <div class="search-section">
+      <div class="input-wrapper">
+        <input type="text" id="ingredients-input" class="ingredients-input" placeholder="e.g. tomato, cheese, bread, apple..." autocomplete="off">
+        <button id="find-btn" class="find-btn"><i class="fa-solid fa-utensils"></i> Find Recipes</button>
+      </div>
+      <div class="suggestions">
+        Try clicking: 
+        <span class="suggest-chip">cheese, bread, tomato</span>
+        <span class="suggest-chip">egg, onion, tomato</span>
+        <span class="suggest-chip">apple, flour, sugar</span>
+      </div>
+    </div>
+
+    <div class="recipes-grid" id="recipes-grid">
+      <!-- Dynamic cards here -->
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="recipe-modal" id="recipe-modal">
+    <div class="modal-content">
+      <button class="close-modal" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="modal-title" id="modal-title">Grilled Cheese Tomato Sandwich</h2>
+      <div class="modal-meta">
+        <span id="modal-time"><i class="fa-regular fa-clock"></i> 15 Mins</span>
+        <span id="modal-cal"><i class="fa-solid fa-fire"></i> 340 Kcal</span>
+      </div>
+      
+      <h3 class="modal-section-title">Required Ingredients</h3>
+      <ul class="modal-ingredients" id="modal-ingredients">
+        <!-- List here -->
+      </ul>
+
+      <h3 class="modal-section-title">Cooking Instructions</h3>
+      <ol class="modal-instructions" id="modal-instructions">
+        <!-- Directions here -->
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('ingredients-input');
+      const findBtn = document.getElementById('find-btn');
+      const grid = document.getElementById('recipes-grid');
+      const modal = document.getElementById('recipe-modal');
+      const closeModal = document.getElementById('close-modal');
+      const chips = document.querySelectorAll('.suggest-chip');
+
+      // Elements inside Modal
+      const modalTitle = document.getElementById('modal-title');
+      const modalTime = document.getElementById('modal-time');
+      const modalCal = document.getElementById('modal-cal');
+      const modalIngredients = document.getElementById('modal-ingredients');
+      const modalInstructions = document.getElementById('modal-instructions');
+
+      // Recipe Database
+      const recipes = [
+        {
+          id: 1,
+          name: "Grilled Cheese Tomato Sandwich",
+          time: "10 Mins",
+          cal: "350 Kcal",
+          ingredients: ["bread", "cheese", "tomato", "butter"],
+          instructions: [
+            "Butter one side of each bread slice.",
+            "Place one slice butter-side down on a pan, top with cheese slices and tomato slices.",
+            "Place the second slice of bread on top, butter-side up.",
+            "Grill until golden brown on both sides and cheese is melted."
+          ]
+        },
+        {
+          id: 2,
+          name: "Garlic Tomato Toast",
+          time: "15 Mins",
+          cal: "220 Kcal",
+          ingredients: ["bread", "tomato", "garlic", "olive oil"],
+          instructions: [
+            "Toast the bread slices until crispy.",
+            "Rub raw cut garlic clove over the toasted bread.",
+            "Drizzle olive oil and top with finely chopped tomatoes.",
+            "Season with salt and pepper."
+          ]
+        },
+        {
+          id: 3,
+          name: "Fluffy Classic Omelette",
+          time: "8 Mins",
+          cal: "190 Kcal",
+          ingredients: ["egg", "butter", "onion", "tomato", "salt"],
+          instructions: [
+            "Whisk eggs with a pinch of salt.",
+            "Melt butter in a skillet over medium heat.",
+            "Add finely chopped onion and tomato, sauteing for 2 minutes.",
+            "Pour in the eggs, cook until edges set, then fold and serve."
+          ]
+        },
+        {
+          id: 4,
+          name: "Baked Apple Crisp",
+          time: "30 Mins",
+          cal: "280 Kcal",
+          ingredients: ["apple", "flour", "sugar", "butter", "cinnamon"],
+          instructions: [
+            "Slice apples and place in a baking dish, dusting with cinnamon.",
+            "Mix flour, sugar, and cold butter until crumbly.",
+            "Spread the crumble topping over the apples.",
+            "Bake at 180°C for 25 minutes until golden."
+          ]
+        },
+        {
+          id: 5,
+          name: "Classic Sweet Pancakes",
+          time: "20 Mins",
+          cal: "310 Kcal",
+          ingredients: ["flour", "egg", "milk", "sugar", "butter"],
+          instructions: [
+            "Whisk flour, sugar, eggs, and milk together until smooth.",
+            "Melt a small knob of butter on a hot griddle.",
+            "Pour batter and cook until bubbles form, then flip.",
+            "Serve hot with honey or maple syrup."
+          ]
+        }
+      ];
+
+      function renderRecipes(filterString = '') {
+        grid.innerHTML = '';
+        const searchIngredients = filterString.toLowerCase()
+          .split(',')
+          .map(i => i.trim())
+          .filter(i => i !== '');
+
+        let matches = [];
+
+        if (searchIngredients.length === 0) {
+          // Show all if empty
+          matches = recipes.map(r => ({ ...r, matchCount: 0 }));
+        } else {
+          // Calculate overlaps
+          recipes.forEach(r => {
+            let count = 0;
+            searchIngredients.forEach(searchItem => {
+              if (r.ingredients.some(ing => ing.includes(searchItem) || searchItem.includes(ing))) {
+                count++;
+              }
+            });
+
+            if (count > 0) {
+              matches.push({ ...r, matchCount: count });
+            }
+          });
+
+          // Sort by match count descending
+          matches.sort((a, b) => b.matchCount - a.matchCount);
+        }
+
+        if (matches.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px 0;">No matching recipes found. Try other ingredients!</div>`;
+          return;
+        }
+
+        matches.forEach(r => {
+          const card = document.createElement('div');
+          card.className = 'recipe-card';
+          
+          let matchTag = '';
+          if (r.matchCount > 0) {
+            matchTag = `<span class="match-tag"><i class="fa-solid fa-circle-check"></i> Matches ${r.matchCount} ingredient${r.matchCount > 1 ? 's' : ''}</span>`;
+          } else {
+            matchTag = `<span class="match-tag" style="color: var(--text-secondary)"><i class="fa-regular fa-circle"></i> Suggested Recipe</span>`;
+          }
+
+          card.innerHTML = `
+            <div class="recipe-details-summary">
+              ${matchTag}
+              <h3 class="recipe-title">${r.name}</h3>
+              <div class="recipe-meta">
+                <span><i class="fa-regular fa-clock"></i> ${r.time}</span>
+                <span><i class="fa-solid fa-fire"></i> ${r.cal}</span>
+              </div>
+            </div>
+          `;
+
+          card.addEventListener('click', () => openRecipeDetails(r));
+          grid.appendChild(card);
+        });
+      }
+
+      function openRecipeDetails(recipe) {
+        modalTitle.textContent = recipe.name;
+        modalTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${recipe.time}`;
+        modalCal.innerHTML = `<i class="fa-solid fa-fire"></i> ${recipe.cal}`;
+        
+        modalIngredients.innerHTML = '';
+        recipe.ingredients.forEach(ing => {
+          const li = document.createElement('li');
+          li.textContent = ing.charAt(0).toUpperCase() + ing.slice(1);
+          modalIngredients.appendChild(li);
+        });
+
+        modalInstructions.innerHTML = '';
+        recipe.instructions.forEach(step => {
+          const li = document.createElement('li');
+          li.textContent = step;
+          modalInstructions.appendChild(li);
+        });
+
+        modal.style.display = 'flex';
+      }
+
+      // Close modal events
+      closeModal.addEventListener('click', () => modal.style.display = 'none');
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+
+      // Search events
+      findBtn.addEventListener('click', () => {
+        renderRecipes(input.value);
+      });
+
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') renderRecipes(input.value);
+      });
+
+      // Suggestion chips
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          input.value = chip.textContent;
+          renderRecipes(chip.textContent);
+        });
+      });
+
+      // Initial render
+      renderRecipes();
+    });
+  </script>
+</body>
+</html>
